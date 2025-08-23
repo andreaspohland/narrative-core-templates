@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"><title>Weekly Sales Briefing</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 960px; margin: 0 auto; }
+    .card { background:#fff; border:1px solid #eee; border-radius:8px; padding:16px; margin:16px 0; }
+    h1 { margin-top: 24px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+    th { background:#f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Weekly Sales Briefing</h1>
+
+  <div class="card">
+    <h2>Zusammenfassung</h2>
+    <p style="white-space:pre-line">{{ narrative }}</p>
+  </div>
+
+  <div class="card">
+    <h2>Kennzahlen (Woche)</h2>
+    <table>
+      <thead><tr><th>Kennzahl</th><th>Wert</th></tr></thead>
+      <tbody>
+        {% if kpis.week is defined %}
+        <tr><td>Umsatz (NetAmount)</td><td>{{ kpis.week.NetAmount | chf }}</td></tr>
+        <tr><td>Δ Umsatz %</td><td>{{ kpis.week.NetAmount_ChangePct | pct }}</td></tr>
+        <tr><td>Transaktionen</td><td>{{ kpis.week.TransactionCnt }}</td></tr>
+        <tr><td>Kunden</td><td>{{ kpis.week.CustomerCnt }}</td></tr>
+        {% else %}
+        <tr><td colspan="2">{{ t.get('no_week_data','Keine Wochen-Daten verfügbar.') }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <footer style="margin:24px 0; color:#666; font-size:12px">Automatisch erzeugt.</footer>
+</body>
+</html>
