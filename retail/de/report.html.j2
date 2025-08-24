@@ -16,6 +16,9 @@
   </style>
 </head>
 <body>
+  {# Debug einmalig: kann danach wieder raus #}
+  {# <p>kpi defined? {{ 'yes' if kpi is defined else 'no' }} | llm defined? {{ 'yes' if llm is defined else 'no' }}</p> #}
+
   {% set week = kpi.week %}
   {% set mtd  = kpi.mtd  %}
   {% set ytd  = kpi.ytd  %}
