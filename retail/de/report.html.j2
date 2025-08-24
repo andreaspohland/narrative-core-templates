@@ -17,9 +17,9 @@
 </head>
 <body>
 
-  {% set week = kpi.week %}
-  {% set mtd  = kpi.mtd  %}
-  {% set ytd  = kpi.ytd  %}
+  {% set week = kpis.week %}
+  {% set mtd  = kpis.mtd  %}
+  {% set ytd  = kpis.ytd  %}
 
   <div class="wrap header">
     <div style="font-size:28px; font-weight:bold;">
@@ -84,15 +84,15 @@
     </div>
 
     <h2>📝 Zusammenfassung</h2>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>Woche:</strong> {{ llm.summaryWeek }}</p>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>MTD:</strong>   {{ llm.summaryMTD }}</p>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>YTD:</strong>   {{ llm.summaryYTD }}</p>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>Woche:</strong> {{ narrative.summaryWeek }}</p>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>MTD:</strong>   {{ narrative.summaryMTD }}</p>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>YTD:</strong>   {{ narrative.summaryYTD }}</p>
 
     <h2>🌤️ Wetter-Analyse</h2>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ llm.weather }}</p>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ narrative.weather }}</p>
 
     <h2>📦 Sortiment & Empfehlungen</h2>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ llm.stock }}</p>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ narrative.stock }}</p>
   </div>
 
   <div class="wrap footer">
