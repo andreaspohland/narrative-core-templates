@@ -16,6 +16,23 @@
   </style>
 </head>
 <body>
+  {# ---------- Format-Macros ---------- #}
+  {% macro fmt0(x) -%}
+    {%- if x is number -%}
+      {{ "{:,.0f}".format(x) | replace(",", "'") }}
+    {%- else -%}
+      {{ "" }}
+    {%- endif -%}
+  {%- endmacro %}
+
+  {% macro fmtpct(x) -%}
+    {%- if x is number -%}
+      {{ "{:.0f}%".format(x * 100) }}
+    {%- else -%}
+      {{ "" }}
+    {%- endif -%}
+  {%- endmacro %}
+
   {# --- Defensiver Zugriff auf Daten --- #}
   {% set week = (kpis.week | default({}, true)) %}
   {% set mtd  = (kpis.mtd  | default({}, true)) %}
@@ -47,31 +64,31 @@
             <tr>
               <td>{{ label }}</td>
 
-              <td>{{ w[base] | default('') }}</td>
-              <td>{{ w[base ~ 'PY'] | default('') }}</td>
+              <td>{{ fmt0(w[base]) }}</td>
+              <td>{{ fmt0(w[base ~ 'PY']) }}</td>
               <td style="color: {{ 'red' if (wdiff is number and wdiff < 0) else 'green' if (wdiff is number and wdiff > 0) else 'inherit' }}">
-                {{ wdiff | default('') }}{{ ' ↓' if (wdiff is number and wdiff < 0) else ' ↑' if (wdiff is number and wdiff > 0) else '' }}
+                {{ fmt0(wdiff) }}{{ ' ↓' if (wdiff is number and wdiff < 0) else ' ↑' if (wdiff is number and wdiff > 0) else '' }}
               </td>
               <td style="color: {{ 'red' if (wdiff is number and wdiff < 0) else 'green' if (wdiff is number and wdiff > 0) else 'inherit' }}">
-                {{ (w[base ~ '_ChangePct'] | default(None)) | pct }}
+                {{ fmtpct(w[base ~ '_ChangePct'] | default(None)) }}
               </td>
 
-              <td>{{ m[base] | default('') }}</td>
-              <td>{{ m[base ~ 'PY'] | default('') }}</td>
+              <td>{{ fmt0(m[base]) }}</td>
+              <td>{{ fmt0(m[base ~ 'PY']) }}</td>
               <td style="color: {{ 'red' if (mdiff is number and mdiff < 0) else 'green' if (mdiff is number and mdiff > 0) else 'inherit' }}">
-                {{ mdiff | default('') }}{{ ' ↓' if (mdiff is number and mdiff < 0) else ' ↑' if (mdiff is number and mdiff > 0) else '' }}
+                {{ fmt0(mdiff) }}{{ ' ↓' if (mdiff is number and mdiff < 0) else ' ↑' if (mdiff is number and mdiff > 0) else '' }}
               </td>
               <td style="color: {{ 'red' if (mdiff is number and mdiff < 0) else 'green' if (mdiff is number and mdiff > 0) else 'inherit' }}">
-                {{ (m[base ~ '_ChangePct'] | default(None)) | pct }}
+                {{ fmtpct(m[base ~ '_ChangePct'] | default(None)) }}
               </td>
 
-              <td>{{ y[base] | default('') }}</td>
-              <td>{{ y[base ~ 'PY'] | default('') }}</td>
+              <td>{{ fmt0(y[base]) }}</td>
+              <td>{{ fmt0(y[base ~ 'PY']) }}</td>
               <td style="color: {{ 'red' if (ydiff is number and ydiff < 0) else 'green' if (ydiff is number and ydiff > 0) else 'inherit' }}">
-                {{ ydiff | default('') }}{{ ' ↓' if (ydiff is number and ydiff < 0) else ' ↑' if (ydiff is number and ydiff > 0) else '' }}
+                {{ fmt0(ydiff) }}{{ ' ↓' if (ydiff is number and ydiff < 0) else ' ↑' if (ydiff is number and ydiff > 0) else '' }}
               </td>
               <td style="color: {{ 'red' if (ydiff is number and ydiff < 0) else 'green' if (ydiff is number and ydiff > 0) else 'inherit' }}">
-                {{ (y[base ~ '_ChangePct'] | default(None)) | pct }}
+                {{ fmtpct(y[base ~ '_ChangePct'] | default(None)) }}
               </td>
             </tr>
           {%- endmacro %}
