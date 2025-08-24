@@ -16,6 +16,14 @@
   </style>
 </head>
 <body>
+  {# Fallback-Mapping, falls der Renderer 'kpi' nicht setzt #}
+  {% if kpi is not defined and data is defined and data.kpi is defined %}
+  {% set kpi = data.kpi %}
+  {% elif kpi is not defined and data is defined %}
+  {% set kpi = data %}
+  {% elif kpi is not defined and ctx is defined and ctx.kpi is defined %}
+  {% set kpi = ctx.kpi %}
+  {% endif %}
 
   {% set week = kpi.week %}
   {% set mtd  = kpi.mtd  %}
