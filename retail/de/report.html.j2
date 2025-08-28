@@ -111,7 +111,7 @@
 
     {# --- Wetter-Chart (optional; benötigt weatherChart im Render-Context) --- #}
     {% if weatherChart %}
-      <div style="margin: 12px 0 24px;">
+      <div style="margin:12px 0 24px; width:75%; max-width:75%; min-width:360px;">
         <canvas id="tempChart" height="120"></canvas>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -119,17 +119,15 @@
       (function() {
         const cfg = {{ weatherChart | tojson }};
         const ctx = document.getElementById('tempChart').getContext('2d');
-
-        // Schwach transparente Hinterlegung für Sa/So
+    
+        // Wochenende soft hinterlegen
         const weekend = cfg.weekend || [];
         const weekendBg = {
           id: 'weekendBg',
-          beforeDraw(chart, args, opts) {
+          beforeDraw(chart) {
             const {ctx, chartArea, scales:{x}} = chart;
             if (!chartArea || !x) return;
-            ctx.save();
-            ctx.globalAlpha = 0.06;
-            ctx.fillStyle = '#000';
+            ctx.save(); ctx.globalAlpha = 0.06; ctx.fillStyle = '#000';
             weekend.forEach((isWknd, i) => {
               if (!isWknd) return;
               const labelsLen = (cfg.labels || []).length;
@@ -143,17 +141,24 @@
             ctx.restore();
           }
         };
-
+    
+        // Mixed chart: Balken = Niederschlag (y1), Linien = Temperatur (y)
         const datasets = [];
+        if (cfg.rain && cfg.rain[0]) {
+          datasets.push({ type:'bar', label: cfg.rain[0].name, data: cfg.rain[0].data, yAxisID:'y1' });
+        }
+        if (cfg.rain && cfg.rain[1]) {
+          datasets.push({ type:'bar', label: cfg.rain[1].name, data: cfg.rain[1].data, yAxisID:'y1' });
+        }
         if (cfg.series && cfg.series[0]) {
-          datasets.push({ label: cfg.series[0].name, data: cfg.series[0].data, spanGaps: true, tension: 0.25 });
+          datasets.push({ type:'line', label: cfg.series[0].name, data: cfg.series[0].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3 });
         }
         if (cfg.series && cfg.series[1]) {
-          datasets.push({ label: cfg.series[1].name, data: cfg.series[1].data, spanGaps: true, tension: 0.25 });
+          datasets.push({ type:'line', label: cfg.series[1].name, data: cfg.series[1].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3 });
         }
-
+    
         new Chart(ctx, {
-          type: 'line',
+          type: 'bar',
           data: { labels: cfg.labels || [], datasets },
           options: {
             responsive: true,
@@ -162,16 +167,16 @@
               tooltip: { intersect: false, mode: 'index' }
             },
             scales: {
-              y: { title: { display: true, text: '°C' } },
-              x: { title: { display: true, text: 'Wochentage' } }
-            },
-            elements: { point: { radius: 3 } }
+              y:  { title: { display: true, text: '°C' }, suggestedMin: null, suggestedMax: null, grid: { drawOnChartArea: true } },
+              y1: { title: { display: true, text: 'mm' }, position: 'right', grid: { drawOnChartArea: false } }
+            }
           },
           plugins: [weekendBg]
         });
       })();
       </script>
     {% endif %}
+
 
     <h2>📦 Sortiment & Empfehlungen</h2>
     <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ narrative.stock | default('') }}</p>
