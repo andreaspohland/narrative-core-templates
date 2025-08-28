@@ -9,7 +9,7 @@
     .header { background:#000; color:#fff; padding:20px 40px; display:flex; align-items:center; border-radius:8px 8px 0 0; }
     .logo { background:#ccc; color:#000; padding:7px 22px; margin-left:auto; }
     h2 { background:#ddd; padding:8px; margin:24px 0 8px; }
-    table { border-collapse: collapse; width:100%; text-align:le...olid #ddd; font-size:13px; border-radius:8px; overflow:hidden; }
+    table { border-collapse: collapse; width:100%; text-align:left; border:1px solid #ddd; font-size:13px; border-radius:8px; overflow:hidden; }
     th, td { border:1px solid #ddd; padding:6px 8px; }
     .section { padding:40px; }
     .footer { background:#000; color:#fff; text-align:center; font-size:12px; padding:10px 40px; border-radius:0 0 8px 8px; }
@@ -19,15 +19,7 @@
   {# ---------- Format-Macros ---------- #}
   {% macro fmt0(x) -%}
     {%- if x is number -%}
-      {{ "{:,.0f}".format(x).replace(",", "'") }}
-    {%- else -%}
-      {{ "" }}
-    {%- endif -%}
-  {%- endmacro %}
-
-  {% macro fmt1(x) -%}
-    {%- if x is number -%}
-      {{ "{:,.1f}".format(x).replace(",", "'") }}
+      {{ "{:,.0f}".format(x) | replace(",", "'") }}
     {%- else -%}
       {{ "" }}
     {%- endif -%}
@@ -47,103 +39,138 @@
   {% set ytd  = (kpis.ytd  | default({}, true)) %}
 
   <div class="wrap header">
-    <div>
-      <h1 style="margin:0;">Weekly Sales Briefing</h1>
-      <div style="font-size:12px; opacity:0.8;">Automatisch generierter Wochenbericht</div>
+    <div style="font-size:28px; font-weight:bold;">
+      Weekly Sales Briefing – KW {{ week.SalesWeekNr | default('–') }} - {{ week.SalesYear | default('–') }}
     </div>
-    <div class="logo">LOGO</div>
+    <div class="logo">Logo</div>
   </div>
 
   <div class="wrap section">
-    <h2>🧭 Überblick</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Bereich</th>
-          <th>Wert</th>
-          <th>Δ vs. LY</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Umsatz (Week)</td>
-          <td>{{ fmt1(week.NetAmount) }}</td>
-          <td>{{ fmtpct(week.NetAmount_ChangePct) }}</td>
-        </tr>
-        <tr>
-          <td>Transaktionen (Week)</td>
-          <td>{{ fmt0(week.Transactions) }}</td>
-          <td>{{ fmtpct(week.Transactions_ChangePct) }}</td>
-        </tr>
-        <tr>
-          <td>Kunden (Week)</td>
-          <td>{{ fmt0(week.Customers) }}</td>
-          <td>{{ fmtpct(week.Customers_ChangePct) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <h2>📊 Übersicht Kennzahlen</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead style="background:#f2f2f2;">
+          <tr>
+            <th>Kennzahl</th><th>Woche</th><th>Woche PY</th><th>Δ</th><th>%</th>
+            <th>MTD</th><th>MTD PY</th><th>Δ</th><th>%</th>
+            <th>YTD</th><th>YTD PY</th><th>Δ</th><th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% macro row(label, w, m, y, base) -%}
+            {% set wdiff = (w[base ~ 'Diff'] | default(None)) %}
+            {% set mdiff = (m[base ~ 'Diff'] | default(None)) %}
+            {% set ydiff = (y[base ~ 'Diff'] | default(None)) %}
+            <tr>
+              <td>{{ label }}</td>
 
-    <h2>📝 Narrative</h2>
-    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>Woche:</strong>  {{ narrative.summaryWeek | default('') }}</p>
+              <td>{{ fmt0(w[base]) }}</td>
+              <td>{{ fmt0(w[base ~ 'PY']) }}</td>
+              <td style="color: {{ 'red' if (wdiff is number and wdiff < 0) else 'green' if (wdiff is number and wdiff > 0) else 'inherit' }}">
+                {{ fmt0(wdiff) }}{{ ' ↓' if (wdiff is number and wdiff < 0) else ' ↑' if (wdiff is number and wdiff > 0) else '' }}
+              </td>
+              <td style="color: {{ 'red' if (wdiff is number and wdiff < 0) else 'green' if (wdiff is number and wdiff > 0) else 'inherit' }}">
+                {{ fmtpct(w[base ~ '_ChangePct'] | default(None)) }}
+              </td>
+
+              <td>{{ fmt0(m[base]) }}</td>
+              <td>{{ fmt0(m[base ~ 'PY']) }}</td>
+              <td style="color: {{ 'red' if (mdiff is number and mdiff < 0) else 'green' if (mdiff is number and mdiff > 0) else 'inherit' }}">
+                {{ fmt0(mdiff) }}{{ ' ↓' if (mdiff is number and mdiff < 0) else ' ↑' if (mdiff is number and mdiff > 0) else '' }}
+              </td>
+              <td style="color: {{ 'red' if (mdiff is number and mdiff < 0) else 'green' if (mdiff is number and mdiff > 0) else 'inherit' }}">
+                {{ fmtpct(m[base ~ '_ChangePct'] | default(None)) }}
+              </td>
+
+              <td>{{ fmt0(y[base]) }}</td>
+              <td>{{ fmt0(y[base ~ 'PY']) }}</td>
+              <td style="color: {{ 'red' if (ydiff is number and ydiff < 0) else 'green' if (ydiff is number and ydiff > 0) else 'inherit' }}">
+                {{ fmt0(ydiff) }}{{ ' ↓' if (ydiff is number and ydiff < 0) else ' ↑' if (ydiff is number and ydiff > 0) else '' }}
+              </td>
+              <td style="color: {{ 'red' if (ydiff is number and ydiff < 0) else 'green' if (ydiff is number and ydiff > 0) else 'inherit' }}">
+                {{ fmtpct(y[base ~ '_ChangePct'] | default(None)) }}
+              </td>
+            </tr>
+          {%- endmacro %}
+
+          {{ row('Netto Umsatz', week, mtd, ytd, 'NetAmount') }}
+          {{ row('Transaktionen', week, mtd, ytd, 'TransactionCnt') }}
+          {{ row('Kunden',        week, mtd, ytd, 'CustomerCnt') }}
+          {{ row('Menge',         week, mtd, ytd, 'Quantity') }}
+        </tbody>
+      </table>
+    </div>
+
+    <h2>📝 Zusammenfassung</h2>
+    <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>Woche:</strong> {{ narrative.summaryWeek | default('') }}</p>
     <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>MTD:</strong>   {{ narrative.summaryMTD | default('') }}</p>
     <p style="text-align:justify; line-height:1.6; font-size:16px;"><strong>YTD:</strong>   {{ narrative.summaryYTD | default('') }}</p>
 
     <h2>🌤️ Wetter-Analyse</h2>
     <p style="text-align:justify; line-height:1.6; font-size:16px;">{{ narrative.weather | default('') }}</p>
 
-    {# --- Wetter Chart (optional) --- #}
+    {# --- Wetter-Chart (optional; benötigt weatherChart im Render-Context) --- #}
     {% if weatherChart %}
-    <div class="section">
-      <canvas id="tempChart" height="120"></canvas>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    (function() {
-      const cfg = {{ weatherChart | tojson }};
-      const ctx = document.getElementById('tempChart').getContext('2d');
-      const weekend = cfg.weekend || [];
-      const weekendBg = {
-        id: 'weekendBg',
-        beforeDraw(chart) {
-          const {chartArea, scales:{x}, ctx} = chart;
-          if (!chartArea) return;
-          ctx.save();
-          ctx.globalAlpha = 0.06;
-          ctx.fillStyle = '#000';
-          weekend.forEach((isWknd, i) => {
-            if (!isWknd) return;
-            const x0 = x.getPixelForValue(i) - (x.getPixelForValue(i) - x.getPixelForValue(i-1))/2;
-            const x1 = x.getPixelForValue(i) + (x.getPixelForValue(i+1) - x.getPixelForValue(i))/2;
-            ctx.fillRect(x0, chartArea.top, x1 - x0, chartArea.bottom - chartArea.top);
-          });
-          ctx.restore();
+      <div style="margin: 12px 0 24px;">
+        <canvas id="tempChart" height="120"></canvas>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+      (function() {
+        const cfg = {{ weatherChart | tojson }};
+        const ctx = document.getElementById('tempChart').getContext('2d');
+
+        // Schwach transparente Hinterlegung für Sa/So
+        const weekend = cfg.weekend || [];
+        const weekendBg = {
+          id: 'weekendBg',
+          beforeDraw(chart, args, opts) {
+            const {ctx, chartArea, scales:{x}} = chart;
+            if (!chartArea || !x) return;
+            ctx.save();
+            ctx.globalAlpha = 0.06;
+            ctx.fillStyle = '#000';
+            weekend.forEach((isWknd, i) => {
+              if (!isWknd) return;
+              const labelsLen = (cfg.labels || []).length;
+              const xCenter = x.getPixelForValue(i);
+              const xPrev = x.getPixelForValue(Math.max(i - 1, 0));
+              const xNext = x.getPixelForValue(Math.min(i + 1, labelsLen - 1));
+              const left  = (i === 0) ? xCenter - (xNext - xCenter)/2 : (xCenter + xPrev)/2;
+              const right = (i === labelsLen - 1) ? xCenter + (xCenter - xPrev)/2 : (xCenter + xNext)/2;
+              ctx.fillRect(left, chartArea.top, right - left, chartArea.bottom - chartArea.top);
+            });
+            ctx.restore();
+          }
+        };
+
+        const datasets = [];
+        if (cfg.series && cfg.series[0]) {
+          datasets.push({ label: cfg.series[0].name, data: cfg.series[0].data, spanGaps: true, tension: 0.25 });
         }
-      };
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: cfg.labels,
-          datasets: [
-            { label: cfg.series[0].name, data: cfg.series[0].data, spanGaps: true, tension: 0.25 },
-            { label: cfg.series[1].name, data: cfg.series[1].data, spanGaps: true, tension: 0.25 }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' },
-            tooltip: { intersect: false, mode: 'index' }
+        if (cfg.series && cfg.series[1]) {
+          datasets.push({ label: cfg.series[1].name, data: cfg.series[1].data, spanGaps: true, tension: 0.25 });
+        }
+
+        new Chart(ctx, {
+          type: 'line',
+          data: { labels: cfg.labels || [], datasets },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' },
+              tooltip: { intersect: false, mode: 'index' }
+            },
+            scales: {
+              y: { title: { display: true, text: '°C' } },
+              x: { title: { display: true, text: 'Wochentage' } }
+            },
+            elements: { point: { radius: 3 } }
           },
-          scales: {
-            y: { title: { display: true, text: '°C' } },
-            x: { title: { display: true, text: 'Wochentage' } }
-          },
-          elements: { point: { radius: 3 } }
-        },
-        plugins: [weekendBg]
-      });
-    })();
-    </script>
+          plugins: [weekendBg]
+        });
+      })();
+      </script>
     {% endif %}
 
     <h2>📦 Sortiment & Empfehlungen</h2>
