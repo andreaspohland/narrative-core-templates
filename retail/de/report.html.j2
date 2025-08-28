@@ -111,8 +111,10 @@
 
     {# --- Wetter-Chart (optional; benötigt weatherChart im Render-Context) --- #}
     {% if weatherChart %}
-      <div style="margin:12px 0 24px; width:75%; max-width:75%; min-width:360px;">
-        <canvas id="tempChart" height="120"></canvas>
+      <div style="margin:12px 0 24px; display:flex; justify-content:center;">
+        <div style="width:75%; min-width:360px; max-width:75%;">
+          <canvas id="tempChart" height="120"></canvas>
+        </div>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script>
@@ -120,7 +122,7 @@
         const cfg = {{ weatherChart | tojson }};
         const ctx = document.getElementById('tempChart').getContext('2d');
     
-        // Wochenende soft hinterlegen
+        // Wochenende Hintergrund
         const weekend = cfg.weekend || [];
         const weekendBg = {
           id: 'weekendBg',
@@ -142,19 +144,18 @@
           }
         };
     
-        // Mixed chart: Balken = Niederschlag (y1), Linien = Temperatur (y)
         const datasets = [];
         if (cfg.rain && cfg.rain[0]) {
-          datasets.push({ type:'bar', label: cfg.rain[0].name, data: cfg.rain[0].data, yAxisID:'y1' });
+          datasets.push({ type:'bar', label: cfg.rain[0].name, data: cfg.rain[0].data, yAxisID:'y1', backgroundColor:'rgba(54,162,235,0.5)' });
         }
         if (cfg.rain && cfg.rain[1]) {
-          datasets.push({ type:'bar', label: cfg.rain[1].name, data: cfg.rain[1].data, yAxisID:'y1' });
+          datasets.push({ type:'bar', label: cfg.rain[1].name, data: cfg.rain[1].data, yAxisID:'y1', backgroundColor:'rgba(153,102,255,0.5)' });
         }
         if (cfg.series && cfg.series[0]) {
-          datasets.push({ type:'line', label: cfg.series[0].name, data: cfg.series[0].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3 });
+          datasets.push({ type:'line', label: cfg.series[0].name, data: cfg.series[0].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3, borderColor:'#e74c3c' });
         }
         if (cfg.series && cfg.series[1]) {
-          datasets.push({ type:'line', label: cfg.series[1].name, data: cfg.series[1].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3 });
+          datasets.push({ type:'line', label: cfg.series[1].name, data: cfg.series[1].data, yAxisID:'y', spanGaps:true, tension:0.25, pointRadius:3, borderColor:'#2ecc71' });
         }
     
         new Chart(ctx, {
@@ -163,12 +164,13 @@
           options: {
             responsive: true,
             plugins: {
-              legend: { position: 'top' },
-              tooltip: { intersect: false, mode: 'index' }
+              legend: { display:true, position:'bottom' },
+              title: { display:true, text:'Tageswerte Temperatur (°C) & Niederschlag (mm)', font:{size:16}, padding:{top:10,bottom:20} },
+              tooltip: { intersect:false, mode:'index' }
             },
             scales: {
-              y:  { title: { display: true, text: '°C' }, suggestedMin: null, suggestedMax: null, grid: { drawOnChartArea: true } },
-              y1: { title: { display: true, text: 'mm' }, position: 'right', grid: { drawOnChartArea: false } }
+              y:  { title: { display: true, text: '°C' }, grid:{ drawOnChartArea:true } },
+              y1: { title: { display: true, text: 'mm' }, position:'right', grid:{ drawOnChartArea:false } }
             }
           },
           plugins: [weekendBg]
@@ -176,6 +178,7 @@
       })();
       </script>
     {% endif %}
+
 
 
     <h2>📦 Sortiment & Empfehlungen</h2>
