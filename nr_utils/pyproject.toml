@@ -11,5 +11,9 @@ requires-python = ">=3.10"
 authors = [{name = "Andreas Pohland"}]
 dependencies = []  # optional: ["jsonschema>=4.23.0"]
 
+[project.scripts]
+nr-kpi = "nr_utils.cli_kpi:main"
+nr-weather = "nr_utils.cli_weather:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
