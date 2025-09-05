@@ -42,7 +42,9 @@ def main():
         print("[nr-kpi] Success, files written.", file=sys.stderr)
 
     except Exception as e:
-        print(f"[nr-kpi] Error: {e}", file=sys.stderr)
+        msg = f"[nr-kpi] Error: {e}"
+        print(msg, file=sys.stderr)
+        print(msg)  # zusätzlich stdout
         traceback.print_exc()
         sys.exit(1)
 
