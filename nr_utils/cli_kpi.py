@@ -3,31 +3,27 @@ from nr_utils.kpi import build_kpi
 
 def main():
     p = argparse.ArgumentParser(description="Build KPI payload for NarrativeReports")
-    p.add_argument("--in",  dest="infile",  default="kpis.json", help="Input rows JSON")
-    p.add_argument("--out1", dest="out1",   default="formatted_kpis.json", help='Output {"kpi": {...}}')
-    p.add_argument("--out2", dest="out2",   default="kpi.json", help='Output only the kpi object')
-    p.add_argument("--period-field", default="PeriodType", help="Input field for period (PeriodType/Scope)")
+    p.add_argument("--in",  dest="infile",  default="kpis.json")
+    p.add_argument("--out1", dest="out1",   default="formatted_kpis.json")
+    p.add_argument("--out2", dest="out2",   default="kpi.json")
+    p.add_argument("--period-field", default="PeriodType")
     args = p.parse_args()
 
     try:
-        with open(args.infile, "r", encoding="utf-8") as f:
-            rows = json.load(f)
+        rows = json.load(open(args.infile, "r", encoding="utf-8"))
 
-        # Debug-Ausgabe zum Input
+        # 🔎 Debug-Ausgaben
         print(f"[nr-kpi] Loaded type={type(rows)}", file=sys.stderr)
-        if isinstance(rows, list):
-            print(f"[nr-kpi] List length={len(rows)}", file=sys.stderr)
-            if rows:
-                print(f"[nr-kpi] First row keys={list(rows[0].keys())}", file=sys.stderr)
-        elif isinstance(rows, dict):
-            print(f"[nr-kpi] Dict keys={list(rows.keys())}", file=sys.stderr)
-        else:
-            print(f"[nr-kpi] Unexpected JSON structure", file=sys.stderr)
+
+        # Falls dict mit "rows", dann umschalten
+        if isinstance(rows, dict) and "rows" in rows:
+            print("[nr-kpi] Detected dict with key 'rows' → unpacking", file=sys.stderr)
+            rows = rows["rows"]
 
         if not isinstance(rows, list):
-            raise ValueError("Input must be a list of rows")
+            raise ValueError(f"Expected list of rows, got {type(rows)}")
 
-        # Kompatibilität: PeriodType -> Scope
+        # Kompatibilität: PeriodType → Scope
         for r in rows:
             if isinstance(r, dict) and args.period_field in r and "Scope" not in r:
                 r["Scope"] = r[args.period_field]
@@ -42,9 +38,7 @@ def main():
         print("[nr-kpi] Success, files written.", file=sys.stderr)
 
     except Exception as e:
-        msg = f"[nr-kpi] Error: {e}"
-        print(msg, file=sys.stderr)
-        print(msg)  # zusätzlich stdout
+        print(f"[nr-kpi] Error: {e}", file=sys.stderr)
         traceback.print_exc()
         sys.exit(1)
 
