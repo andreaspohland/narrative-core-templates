@@ -1,4 +1,4 @@
-import json, argparse, sys
+import json, argparse, sys, traceback
 from nr_utils.kpi import build_kpi
 
 def main():
@@ -10,11 +10,24 @@ def main():
     args = p.parse_args()
 
     try:
-        rows = json.load(open(args.infile, "r", encoding="utf-8"))
+        with open(args.infile, "r", encoding="utf-8") as f:
+            rows = json.load(f)
+
+        # Debug-Ausgabe zum Input
+        print(f"[nr-kpi] Loaded type={type(rows)}", file=sys.stderr)
+        if isinstance(rows, list):
+            print(f"[nr-kpi] List length={len(rows)}", file=sys.stderr)
+            if rows:
+                print(f"[nr-kpi] First row keys={list(rows[0].keys())}", file=sys.stderr)
+        elif isinstance(rows, dict):
+            print(f"[nr-kpi] Dict keys={list(rows.keys())}", file=sys.stderr)
+        else:
+            print(f"[nr-kpi] Unexpected JSON structure", file=sys.stderr)
+
         if not isinstance(rows, list):
             raise ValueError("Input must be a list of rows")
 
-        # Kompatibilität: PeriodType → Scope
+        # Kompatibilität: PeriodType -> Scope
         for r in rows:
             if isinstance(r, dict) and args.period_field in r and "Scope" not in r:
                 r["Scope"] = r[args.period_field]
@@ -25,8 +38,12 @@ def main():
                   ensure_ascii=False, indent=2)
         json.dump(kpi, open(args.out2, "w", encoding="utf-8"),
                   ensure_ascii=False, indent=2)
+
+        print("[nr-kpi] Success, files written.", file=sys.stderr)
+
     except Exception as e:
         print(f"[nr-kpi] Error: {e}", file=sys.stderr)
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
